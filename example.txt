@@ -1,0 +1,13 @@
+  지금 띄워져 있는 컨테이너에서 암호가 완전히 다른 임의의 계정을 하나 만들어 테스트해 보시면 바로 확인하실 수 있습니다.
+    # 1. 외우기도 힘든 무작위 암호로 새 유저 생성
+    docker exec -it postgres_md5_lab psql -U postgres -d company_db -c \
+      "CREATE USER victim_admin WITH PASSWORD 'Xk9#mQ2!vL8@zA4$wP7%rT1&';"
+
+    # 2. DB에서 생성된 해시값 확인 (예: md5...)
+    docker exec -it postgres_md5_lab psql -U postgres -d company_db -c \
+      "SELECT rolname, rolpassword FROM pg_authid WHERE rolname = 'victim_admin';"
+
+    # 3. 평문 암호는 모른 채, 방금 확인한 해시값만 넣고 공격 스크립트 실행
+    python3 2_exploit_pass_the_hash.py <조회된_해시값> victim_admin
+
+  실행해 보시면 평문 암호(Xk9#mQ2!vL8@zA4$...)를 공격 코드에 단 한 글자도 알려주지 않았음에도 불구하고, 동일한 코드로 완벽하게 인증을 통과하여 데이터를 털어오는 것을 확인하실 수 있습니다. 이것이 바로 보안 전문가들이 MD5를 결코 써서는 안 된다고 경고하는 이유입니다.

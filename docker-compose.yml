@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_md5_lab
+    restart: always
+    environment:
+      POSTGRES_DB: company_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: supersecretpassword123
+      POSTGRES_INITDB_ARGS: "--auth-host=md5 --auth-local=md5"
+    command:
+      - "postgres"
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
+      - "-c"
+      - "hba_file=/etc/postgresql/pg_hba.conf"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./config/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./config/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ./init-scripts/01-init-dummy-data.sql:/docker-entrypoint-initdb.d/01-init-dummy-data.sql:ro
+      - pgdata:/var/lib/postgresql
+
+volumes:
+  pgdata:
